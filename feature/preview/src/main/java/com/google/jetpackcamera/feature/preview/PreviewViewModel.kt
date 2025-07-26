@@ -356,8 +356,8 @@ class PreviewViewModel @AssistedInject constructor(
         settingExtractor: KProperty1<CameraAppSettings, R>,
         crossinline settingApplicator: suspend (R) -> Unit
     ) {
-        val oldSetting = settingExtractor.invoke(this)
-        val newSetting = settingExtractor.invoke(new)
+        val oldSetting = settingExtractor.get(this)
+        val newSetting = settingExtractor.get(new)
         if (oldSetting != newSetting) {
             settingApplicator(newSetting)
         }
