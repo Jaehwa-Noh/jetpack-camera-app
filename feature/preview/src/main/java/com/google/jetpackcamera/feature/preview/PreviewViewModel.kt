@@ -98,6 +98,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.reflect.KProperty1
 
 private const val TAG = "PreviewViewModel"
 private const val IMAGE_CAPTURE_TRACE = "JCA Image Capture"
@@ -333,7 +334,7 @@ class PreviewViewModel @AssistedInject constructor(
             _captureUiState.update { old ->
                 (old as? CaptureUiState.Ready)?.copy(
                     imageWellUiState =
-                    ImageWellUiState.from(lastCapturedMediaDescriptor)
+                        ImageWellUiState.from(lastCapturedMediaDescriptor)
                 ) ?: old
             }
         }
@@ -352,7 +353,7 @@ class PreviewViewModel @AssistedInject constructor(
      */
     private suspend inline fun <R> CameraAppSettings.applyDiff(
         new: CameraAppSettings,
-        settingExtractor: CameraAppSettings.() -> R,
+        settingExtractor: KProperty1<CameraAppSettings, R>,
         crossinline settingApplicator: suspend (R) -> Unit
     ) {
         val oldSetting = settingExtractor.invoke(this)
@@ -500,7 +501,7 @@ class PreviewViewModel @AssistedInject constructor(
     ) {
         if (captureUiState.value is CaptureUiState.Ready &&
             (captureUiState.value as CaptureUiState.Ready).externalCaptureMode is
-                ExternalCaptureMode.ExternalVideoCaptureMode
+                    ExternalCaptureMode.ExternalVideoCaptureMode
         ) {
             enqueueExternalImageCaptureUnsupportedSnackBar()
             return
@@ -508,7 +509,7 @@ class PreviewViewModel @AssistedInject constructor(
 
         if (captureUiState.value is CaptureUiState.Ready &&
             (captureUiState.value as CaptureUiState.Ready).externalCaptureMode is
-                ExternalCaptureMode.ExternalVideoCaptureMode
+                    ExternalCaptureMode.ExternalVideoCaptureMode
         ) {
             addSnackBarData(
                 SnackbarData(
@@ -524,16 +525,16 @@ class PreviewViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val (uriIndex: Int, finalImageUri: Uri?) =
                 (
-                    (captureUiState.value as? CaptureUiState.Ready)?.externalCaptureMode as?
-                        ExternalCaptureMode.ExternalMultipleImageCaptureMode
-                    )?.let {
-                    val uri = if (ignoreUri || it.imageCaptureUris.isNullOrEmpty()) {
-                        null
-                    } else {
-                        it.imageCaptureUris!![externalUriIndex]
-                    }
-                    Pair(externalUriIndex, uri)
-                } ?: Pair(-1, imageCaptureUri)
+                        (captureUiState.value as? CaptureUiState.Ready)?.externalCaptureMode as?
+                                ExternalCaptureMode.ExternalMultipleImageCaptureMode
+                        )?.let {
+                        val uri = if (ignoreUri || it.imageCaptureUris.isNullOrEmpty()) {
+                            null
+                        } else {
+                            it.imageCaptureUris!![externalUriIndex]
+                        }
+                        Pair(externalUriIndex, uri)
+                    } ?: Pair(-1, imageCaptureUri)
             captureImageInternal(
                 doTakePicture = {
                     cameraUseCase.takePicture({
@@ -561,14 +562,14 @@ class PreviewViewModel @AssistedInject constructor(
 
     private fun incrementExternalMultipleImageCaptureModeUriIndexIfNeeded() {
         (
-            (captureUiState.value as? CaptureUiState.Ready)
-                ?.externalCaptureMode as? ExternalCaptureMode.ExternalMultipleImageCaptureMode
-            )?.let {
-            if (!it.imageCaptureUris.isNullOrEmpty()) {
-                externalUriIndex++
-                Log.d(TAG, "Uri index for multiple image capture at $externalUriIndex")
+                (captureUiState.value as? CaptureUiState.Ready)
+                    ?.externalCaptureMode as? ExternalCaptureMode.ExternalMultipleImageCaptureMode
+                )?.let {
+                if (!it.imageCaptureUris.isNullOrEmpty()) {
+                    externalUriIndex++
+                    Log.d(TAG, "Uri index for multiple image capture at $externalUriIndex")
+                }
             }
-        }
     }
 
     private suspend fun <T> captureImageInternal(
@@ -625,7 +626,7 @@ class PreviewViewModel @AssistedInject constructor(
     ) {
         if (captureUiState.value is CaptureUiState.Ready &&
             (captureUiState.value as CaptureUiState.Ready).externalCaptureMode is
-                ExternalCaptureMode.ExternalImageCaptureMode
+                    ExternalCaptureMode.ExternalImageCaptureMode
         ) {
             Log.d(TAG, "externalVideoRecording")
             addSnackBarData(
@@ -687,7 +688,7 @@ class PreviewViewModel @AssistedInject constructor(
     }
 
     /**
-     "Locks" the video recording such that the user no longer needs to keep their finger pressed on the capture button
+    "Locks" the video recording such that the user no longer needs to keep their finger pressed on the capture button
      */
     fun setLockedRecording(isLocked: Boolean) {
         trackedPreviewUiState.update { old ->
@@ -777,6 +778,7 @@ class PreviewViewModel @AssistedInject constructor(
             }
         }
     }
+
     fun setClearUiScreenBrightness(brightness: Float) {
         screenFlash.setClearUiScreenBrightness(brightness)
     }
